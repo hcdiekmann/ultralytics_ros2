@@ -1,8 +1,12 @@
+import os
+
+from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
 
 
 def generate_launch_description():
@@ -49,8 +53,22 @@ def generate_launch_description():
         "namespace",
         default_value="yolo",
         description="Namespace for the nodes")
+    
+    use_rviz = LaunchConfiguration("use_rviz")
+    use_rviz_cmd = DeclareLaunchArgument(
+        "use_rviz",
+        default_value="True",
+        description="Wheter to start RViz")
+    
+    rviz_config_file = LaunchConfiguration("rviz_config_file")
+    rviz_config_file_cmd = DeclareLaunchArgument(
+        "rviz_config_file",
+        default_value=os.path.join(get_package_share_directory('ultralytics_ros2'), 'rviz', 'view_pointcloud_and_yolo.rviz'),
+        description="Path to RViz configuration file"
+    )
 
-    # Node
+
+    # Nodes
     detector_node_cmd = Node(
         package="ultralytics_ros2",
         executable="yolov8_node",
@@ -64,6 +82,17 @@ def generate_launch_description():
         remappings=[("image_raw", input_image_topic)]
     )
 
+    start_rviz_cmd = Node(
+        condition=IfCondition(use_rviz),
+        package="rviz2",
+        executable="rviz2",
+        output="screen",
+        arguments=[
+                    '-d', rviz_config_file,
+                ],
+    )
+
+    # Add everything to launch description and return
     ld = LaunchDescription()
 
     ld.add_action(model_cmd)
@@ -73,7 +102,10 @@ def generate_launch_description():
     ld.add_action(threshold_cmd)
     ld.add_action(input_image_topic_cmd)
     ld.add_action(namespace_cmd)
+    ld.add_action(use_rviz_cmd)
+    ld.add_action(rviz_config_file_cmd)
 
     ld.add_action(detector_node_cmd)
+    ld.add_action(start_rviz_cmd)
 
     return ld
