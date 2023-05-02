@@ -36,11 +36,17 @@ def generate_launch_description():
         default_value="True",
         description="Wheter to start inference")
 
-    threshold = LaunchConfiguration("threshold")
-    threshold_cmd = DeclareLaunchArgument(
-        "threshold",
+    conf_threshold = LaunchConfiguration("conf_threshold")
+    conf_threshold_cmd = DeclareLaunchArgument(
+        "conf_threshold",
         default_value="0.5",
         description="Minimum probability of a detection to be published")
+    
+    iou_threshold = LaunchConfiguration("iou_threshold")
+    iou_threshold_cmd = DeclareLaunchArgument(
+        "iou_threshold",
+        default_value="0.7",
+        description="intersection over union (IoU) threshold for NMS")
 
     input_image_topic = LaunchConfiguration("input_image_topic")
     input_image_topic_cmd = DeclareLaunchArgument(
@@ -51,7 +57,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration("namespace")
     namespace_cmd = DeclareLaunchArgument(
         "namespace",
-        default_value="yolo",
+        default_value="ultalytics",
         description="Namespace for the nodes")
     
     use_rviz = LaunchConfiguration("use_rviz")
@@ -78,7 +84,9 @@ def generate_launch_description():
                      "tracker": tracker,
                      "device": device,
                      "enable": enable,
-                     "threshold": threshold}],
+                     "conf_threshold": conf_threshold,
+                     "iou_threshold": iou_threshold,
+                     }],
         remappings=[("image_raw", input_image_topic)]
     )
 
@@ -99,7 +107,8 @@ def generate_launch_description():
     ld.add_action(tracker_cmd)
     ld.add_action(device_cmd)
     ld.add_action(enable_cmd)
-    ld.add_action(threshold_cmd)
+    ld.add_action(conf_threshold_cmd)
+    ld.add_action(iou_threshold_cmd)
     ld.add_action(input_image_topic_cmd)
     ld.add_action(namespace_cmd)
     ld.add_action(use_rviz_cmd)

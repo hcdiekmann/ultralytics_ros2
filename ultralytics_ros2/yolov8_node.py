@@ -27,7 +27,7 @@ class Yolov8Node(Node):
         super().__init__("yolov8_node")
 
         # node params
-        self.declare_parameter("model", "yolov8m.pt")
+        self.declare_parameter("model", "yolov8s.pt")
         model = self.get_parameter(
             "model").get_parameter_value().string_value
 
