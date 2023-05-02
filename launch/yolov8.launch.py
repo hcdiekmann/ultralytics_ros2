@@ -57,7 +57,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration("namespace")
     namespace_cmd = DeclareLaunchArgument(
         "namespace",
-        default_value="ultalytics",
+        default_value="ultralytics",
         description="Namespace for the nodes")
     
     use_rviz = LaunchConfiguration("use_rviz")
@@ -69,7 +69,7 @@ def generate_launch_description():
     rviz_config_file = LaunchConfiguration("rviz_config_file")
     rviz_config_file_cmd = DeclareLaunchArgument(
         "rviz_config_file",
-        default_value=os.path.join(get_package_share_directory('ultralytics_ros2'), 'rviz', 'view_pointcloud_and_yolo.rviz'),
+        default_value=os.path.join(get_package_share_directory('ultralytics_ros2'), 'rviz', 'view_inference_image.rviz'),
         description="Path to RViz configuration file"
     )
 

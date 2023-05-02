@@ -40,23 +40,29 @@ class Yolov8Node(Node):
             "device").get_parameter_value().string_value
 
         self.declare_parameter("conf_threshold", 0.5)
-        conf_threshold = self.get_parameter(
+        self.conf_threshold = self.get_parameter(
             "conf_threshold").get_parameter_value().double_value
         
         self.declare_parameter("iou_threshold", 0.7)
-        iou_threshold = self.get_parameter(
+        self.iou_threshold = self.get_parameter(
             "iou_threshold").get_parameter_value().double_value
 
         self.declare_parameter("enable", True)
         self.enable = self.get_parameter(
             "enable").get_parameter_value().bool_value
+        
+        self.declare_parameter("input_image_topic", "image_raw")
+        input_image_topic = self.get_parameter(
+            "input_image_topic").get_parameter_value().string_value
+        
+        self.declare_parameter("show_inference_image", True)
+        self.show_inference_image = self.get_parameter(
+            "show_inference_image").get_parameter_value().bool_value
 
         self._class_to_color = {}
         self.cv_bridge = CvBridge()
         self.tracker = self.create_tracker(tracker)
         self.yolo = YOLO(model)
-        self.conf_threshold = conf_threshold
-        self.iou_threshold = iou_threshold
         self.yolo.fuse()
         self.yolo.to(device)
 
@@ -64,7 +70,7 @@ class Yolov8Node(Node):
         self._detect_pub = self.create_publisher(Detection2DArray, "detections", 10)
         self._infer_pub = self.create_publisher(Image, "inference_image", 10)
         self._image_sub = self.create_subscription(
-            Image, "image_raw", self.image_cb,
+            Image, input_image_topic, self.image_cb,
             qos_profile_sensor_data
         )
 
@@ -107,6 +113,7 @@ class Yolov8Node(Node):
                 stream=False,
                 conf=self.conf_threshold,
                 iou=self.iou_threshold,
+                show=self.show_inference_image,
                 mode="track"
             )
 
