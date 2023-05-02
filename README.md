@@ -9,7 +9,7 @@ git clone https://github.com/hcdiekmann/ultralytics_ros2.git
 ```
 - #### Install python dependencies
 ```bash
-pip3 install -r /ultralytics_ros2/requirements.txt
+pip3 install -r ultralytics_ros2/requirements.txt
 ```
 - #### Install ROS dependencies
 ```bash
