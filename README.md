@@ -28,5 +28,8 @@ colcon build
 ```bash
 ros2 launch ultralytics_ros2 yolov8_node
 ```
+### Example
+#### YOLOv8 node running together with [pathfinder](https://github.com/hcdiekmann/pathfinder) package Gazebo simulation 
+![YOLOv8 Gazebo example](https://user-images.githubusercontent.com/13176191/235635911-7a489a45-8604-4f4a-a2dc-9641aa5cfb1c.png)
 
 
