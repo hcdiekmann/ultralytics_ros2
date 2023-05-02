@@ -39,9 +39,13 @@ class Yolov8Node(Node):
         device = self.get_parameter(
             "device").get_parameter_value().string_value
 
-        self.declare_parameter("threshold", 0.5)
-        self.threshold = self.get_parameter(
-            "threshold").get_parameter_value().double_value
+        self.declare_parameter("conf_threshold", 0.5)
+        conf_threshold = self.get_parameter(
+            "conf_threshold").get_parameter_value().double_value
+        
+        self.declare_parameter("iou_threshold", 0.7)
+        iou_threshold = self.get_parameter(
+            "iou_threshold").get_parameter_value().double_value
 
         self.declare_parameter("enable", True)
         self.enable = self.get_parameter(
@@ -51,6 +55,8 @@ class Yolov8Node(Node):
         self.cv_bridge = CvBridge()
         self.tracker = self.create_tracker(tracker)
         self.yolo = YOLO(model)
+        self.conf_threshold = conf_threshold
+        self.iou_threshold = iou_threshold
         self.yolo.fuse()
         self.yolo.to(device)
 
@@ -99,7 +105,8 @@ class Yolov8Node(Node):
                 source=cv_image,
                 verbose=False,
                 stream=False,
-                conf=0.1,
+                conf=self.conf_threshold,
+                iou=self.iou_threshold,
                 mode="track"
             )
 
@@ -125,7 +132,7 @@ class Yolov8Node(Node):
                 label = self.yolo.names[int(b.cls)]
                 score = float(b.conf)
 
-                if score < self.threshold:
+                if score < self.conf_threshold:
                     continue
 
                 detection = Detection2D()
