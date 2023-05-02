@@ -69,6 +69,7 @@ class Yolov8Node(Node):
         # topci publishers & subscribers
         self._detect_pub = self.create_publisher(Detection2DArray, "detections", 10)
         self._infer_pub = self.create_publisher(Image, "inference_image", 10)
+        self._tracking_pub = self.create_publisher(Image, "tracking_image", 10)
         self._image_sub = self.create_subscription(
             Image, input_image_topic, self.image_cb,
             qos_profile_sensor_data
@@ -116,8 +117,11 @@ class Yolov8Node(Node):
                 show=self.show_inference_image,
                 mode="track"
             )
-
-            # track
+            
+            # visualize the results on the frame
+            annotated_image = results[0].plot()
+            
+            # get bounding boxes for tracking
             det = results[0].boxes.cpu().numpy()
 
             if len(det) > 0:
@@ -152,7 +156,7 @@ class Yolov8Node(Node):
                 detection.bbox.size_x = float(box[2])
                 detection.bbox.size_y = float(box[3])
 
-                # get track id
+                # create track id
                 track_id = ""
                 if not b.id is None:
                     track_id = str(int(b.id))
@@ -164,7 +168,7 @@ class Yolov8Node(Node):
                 hypothesis.hypothesis.score = score
                 detection.results.append(hypothesis)
 
-                # draw boxes for debug
+                # draw boxes for debugging
                 if label not in self._class_to_color:
                     r = random.randint(0, 255)
                     g = random.randint(0, 255)
@@ -189,7 +193,8 @@ class Yolov8Node(Node):
 
             # publish detections and dbg image
             self._detect_pub.publish(detections_msg)
-            self._infer_pub.publish(self.cv_bridge.cv2_to_imgmsg(cv_image, encoding=msg.encoding))
+            self._infer_pub.publish(self.cv_bridge.cv2_to_imgmsg(annotated_image, encoding=msg.encoding))
+            self._tracking_pub.publish(self.cv_bridge.cv2_to_imgmsg(cv_image, encoding=msg.encoding))
 
 
 def main():
