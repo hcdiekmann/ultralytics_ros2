@@ -2,6 +2,7 @@
 import cv2
 import torch
 import random
+import time
 
 import rclpy
 from rclpy.qos import qos_profile_sensor_data
@@ -35,7 +36,7 @@ class Yolov8Node(Node):
         tracker = self.get_parameter(
             "tracker").get_parameter_value().string_value
 
-        self.declare_parameter("device", "cpu") # "cpu" or "cuda"
+        self.declare_parameter("device", "cpu")
         device = self.get_parameter(
             "device").get_parameter_value().string_value
 
@@ -105,9 +106,13 @@ class Yolov8Node(Node):
     def image_cb(self, msg: Image) -> None:
 
         if self.enable:
+            # record start time
+            fps_start_t = time.perf_counter()
 
             # convert to cv image & predict
             cv_image = self.cv_bridge.imgmsg_to_cv2(msg)
+
+            infer_start_t = time.perf_counter()
             results = self.yolo.predict(
                 source=cv_image,
                 verbose=False,
@@ -117,13 +122,21 @@ class Yolov8Node(Node):
                 show=self.show_inference_image,
                 mode="track"
             )
+            end_time = time.perf_counter()
+            infer_time = (end_time - infer_start_t) * 1000
             
             # visualize the results on the frame
             annotated_image = results[0].plot()
-            
+
+            # record the end time and calculate FPS
+            fps = 1.0 / (end_time - fps_start_t)
+            cv2.putText(annotated_image, "FPS: {:.2f}".format(fps), (10, 30), 
+            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+            # cv2.putText(annotated_image, "Inference Time: {:.2f} ms".format(infer_time), (10, 60), 
+            # cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2, cv2.LINE_AA)
+
             # get bounding boxes for tracking
             det = results[0].boxes.cpu().numpy()
-
             if len(det) > 0:
                 im0s = self.yolo.predictor.batch[2]
                 im0s = im0s if isinstance(im0s, list) else [im0s]

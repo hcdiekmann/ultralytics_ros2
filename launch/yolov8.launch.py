@@ -27,8 +27,8 @@ def generate_launch_description():
     device = LaunchConfiguration("device")
     device_cmd = DeclareLaunchArgument(
         "device",
-        default_value="cpu",
-        description="Device to use GPU or CPU")
+        default_value="cpu", # "cpu" or "cuda"
+        description="Device to use GPU or CPU") 
 
     enable = LaunchConfiguration("enable")
     enable_cmd = DeclareLaunchArgument(
@@ -39,7 +39,7 @@ def generate_launch_description():
     conf_threshold = LaunchConfiguration("conf_threshold")
     conf_threshold_cmd = DeclareLaunchArgument(
         "conf_threshold",
-        default_value="0.5",
+        default_value="0.4",
         description="Minimum probability of a detection to be published")
     
     iou_threshold = LaunchConfiguration("iou_threshold")
