@@ -1,0 +1,20 @@
+version: '3.9'
+# To execute this docker-compose yml file use command:
+#   docker-compose -f <file_name> up [--build] [--no-start] [--no-build] [--force-recreate / --no-recreate] [--detach]
+# For more info about options: docker-compose up --help
+
+services:
+
+  yolov8_node:
+    image: ultralytics-ros2:latest
+    container_name: yolov8
+    network_mode: host
+    environment: # requires running command: "xhost local:root" on host to view RViz
+      - DISPLAY
+    command:
+      - bash
+      - -c
+      - |
+        source /opt/ros/humble/setup.bash
+        source ~/ros2_ws/install/setup.bash
+        ros2 launch ultralytics_ros2 yolov8.launch.py
